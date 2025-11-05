@@ -1,831 +1,224 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Monitoring TA - Yohannes Alfredo</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <!-- Firebase Legacy Compatibility Script -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Monitoring TA</title>
 
-    <!-- INTERNAL STYLES (Menggabungkan dan Memperbaiki CSS Anda) -->
-    <style>
-        :root {
-            --untirta-blue: #004d9c; /* Warna biru Untirta */
-            --primary-bg: #f8f9fa;
-            --warning-color: #ffc107;
-            --success-color: #198754;
-            --danger-color: #dc3545;
-        }
-        body { 
-            padding-top: 65px; 
-            background-color: var(--primary-bg); 
-            font-family: 'Inter', sans-serif;
-        }
-        .navbar { 
-            background-color: var(--untirta-blue) !important; 
-        }
-        .untirta-logo { 
-            height: 40px; 
-            margin-right: 15px; 
-        } 
-        .navbar-time { 
-            color: white; 
-            margin-right: 15px; 
-            font-weight: 500; 
-        }
-        
-        /* Style untuk Profil */
-        .profile-img { 
-            width: 180px; 
-            height: 180px; 
-            object-fit: cover; 
-            border-radius: 50%; 
-            border: 6px solid var(--warning-color); 
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-            padding: 3px;
-        }
-        .info-card { 
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1); 
-            border-radius: 15px; 
-            margin-bottom: 30px;
-            background: #fff;
-        }
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
-        /* Style untuk Login */
-        .login-card { 
-            max-width: 450px; 
-            margin: 80px auto; 
-            border-radius: 15px; 
-            overflow: hidden; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-        }
-        .login-card-header {
-            background-color: var(--untirta-blue);
-            color: white;
-            padding: 20px 0;
-            text-align: center;
-        }
-        .login-logo-large { 
-            height: 80px; 
-            margin: 0 auto 10px auto; 
-            display: block;
-        }
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
 
-        /* Style Navigasi dan Umum */
-        .content-section { 
-            display: none; 
-            padding: 20px 0; 
-        }
+    nav {
+      background-color: #004d40;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+    }
 
-        /* Style Galeri Gambar */
-        #history-container { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-            gap: 25px; 
-            padding-top: 20px; 
-        }
-        .imageItem { 
-            border: none; 
-            border-radius: 10px; 
-            background: white; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-            overflow: hidden; 
-        }
-        .imageItem:hover {
-            transform: translateY(-5px);
-        }
-        .historyImage { 
-            width: 100%; 
-            height: auto; 
-            display: block;
-        }
-        .image-info { 
-            padding: 15px; 
-            text-align: left; 
-        }
+    nav img {
+      height: 40px;
+    }
 
-        /* Style untuk Control Section */
-        .control-card {
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease;
-            margin-bottom: 20px;
-            background-color: white;
-        }
-        .control-card:hover {
-             transform: translateY(-3px);
-             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-        }
-        .form-check-input {
-            width: 3.5rem;
-            height: 1.75rem;
-            cursor: pointer;
-            transition: background-color .3s ease-in-out;
-        }
-        .form-switch .form-check-input {
-            /* Warna Merah/Off Default */
-            background-color: var(--danger-color); 
-            border-color: var(--danger-color);
-        }
-        .form-switch .form-check-input:checked {
-            /* Warna Hijau/On Aktif */
-            background-color: var(--success-color); 
-            border-color: var(--success-color);
-        }
-        .badge-status {
-            font-size: 1em;
-            padding: 0.5em 1em;
-            border-radius: 0.5rem;
-            font-weight: 700;
-        }
-        .list-group-item {
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-        }
-    </style>
+    .container {
+      padding: 20px;
+    }
+
+    .profile img {
+      width: 120px;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    #gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .gallery-item {
+      position: relative;
+      display: inline-block;
+    }
+
+    .gallery-item img {
+      width: 200px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .gallery-item button {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      width: 32px;
+      height: 32px;
+      line-height: 28px;
+    }
+
+    .login-box {
+      max-width: 350px;
+      background: white;
+      margin: 50px auto;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    .login-box img {
+      width: 80px;
+      margin-bottom: 12px;
+    }
+
+    .login-box input {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .login-box button {
+      width: 95%;
+      padding: 10px;
+      background-color: #004d40;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+  </style>
 </head>
+
 <body>
-
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow">
-    <div class="container-fluid">
-        <!-- Placeholder Logo -->
-        <img src="https://placehold.co/40x40/004d9c/ffffff?text=U" alt="Logo UNTIRTA" class="logo_untirta"> 
-        <a class="navbar-brand" href="#">MONITORING TA S1</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="auth-nav-links" style="display: none;">
-                <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="showSection('profile-section')">Profil</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="showSection('gallery-section')">Galeri Kamera</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="#" onclick="showSection('control-section')">Control</a>
-                </li>
-            </ul>
-
-            <div class="d-flex align-items-center">
-                <span class="navbar-text navbar-time">
-                    <i class="fa-regular fa-clock"></i> <span id="current-time"></span>
-                </span>
-                <button class="btn btn-warning" id="auth-button" onclick="handleAuth()">Login</button>
-            </div>
-        </div>
+  <!-- Navbar -->
+  <nav>
+    <div class="nav-left">
+      <img src="assets/logo_untirta.png" alt="Logo Untirta">
+      <span style="font-weight:bold;">Monitoring TA</span>
     </div>
-</nav>
-
-<main class="container mt-5">
-    
-    <!-- Login Section -->
-    <div id="login-section" class="card login-card content-section" style="display: block;">
-        <div class="login-card-header text-center">
-            <img src="https://placehold.co/80x80/004d9c/ffffff?text=U" alt="Logo UNTIRTA" class="login-logo-large rounded-circle">
-            <h4 class="mt-2">Portal Admin TA S1</h4>
-        </div>
-        <div class="card-body p-4">
-            <div class="mb-3">
-                <label for="username" class="form-label">Username (UID)</label>
-                <input type="text" class="form-control" id="username" placeholder="misal: yohannes_ta">
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" placeholder="Password">
-            </div>
-            <button class="btn btn-primary w-100 mb-3" onclick="login()">Login</button>
-            <p class="text-danger text-center" id="auth-error"></p>
-
-            <a href="#" class="text-center mt-2 d-block" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Ganti Password?</a>
-        </div>
+    <div class="nav-right">
+      <button onclick="logout()">Logout</button>
     </div>
+  </nav>
 
-    <!-- Profile Section -->
-    <div id="profile-section" class="content-section">
-        <div class="row justify-content-center">
-            <div class="col-md-10">
-                <div class="card info-card p-5 text-center">
-                    <!-- Placeholder for Profile Image -->
-                    <img src="https://placehold.co/180x180/004d9c/ffc107?text=YA" class="profile-img mx-auto mb-4" alt="Foto Profil Yohannes Alfredo">
-        
-                    <h1 class="display-6 fw-bold mb-3">Yohannes Alfredo</h1>
-                    <h2 class="h5 text-muted mb-4">Mahasiswa S1 Teknik Elektro UNTIRTA</h2>
-                    
-                    <p class="text-start fs-5">
-                        Aplikasi sistem monitoring ini dibuat oleh **Yohannes Alfredo** untuk memenuhi **Tugas Akhir Strata Satu (S1)** di Jurusan Teknik Elektro, **Universitas Sultan Ageng Tirtayasa (UNTIRTA)**. Sistem ini berfungsi untuk memantau perangkat IoT secara *real-time* melalui Firebase Realtime Database dan menampilkan data historis gambar.
-                    </p>
-                    <hr>
-                    <p class="text-start"><i class="fa-solid fa-graduation-cap me-2 text-primary"></i> NIM: **40201800XX**</p>
-                    <p class="text-start"><i class="fa-solid fa-building-columns me-2 text-primary"></i> Jurusan: **Teknik Elektro**</p>
-                </div>
-            </div>
-        </div>
-    </div>
+  <!-- Login -->
+  <div id="loginPage" class="login-box">
+    <img src="assets/logo_untirta.png" alt="Logo Untirta">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username"><br>
+    <input type="password" id="password" placeholder="Password"><br>
+    <button onclick="login()">Masuk</button>
+  </div>
 
-    <!-- Gallery Section -->
-    <div id="gallery-section" class="content-section">
-        <h2 class="mb-4 text-center">Galeri Riwayat Foto dari ESP32</h2>
-        <p class="status text-center text-muted" id="gallery-status">Memuat data...</p>
-        <div id="history-container">
-            <!-- Image cards will be inserted here -->
-        </div>
-    </div>
-    
-    <!-- Control Section (REVISED) -->
-    <div id="control-section" class="content-section">
-        <h2 class="mb-4 text-center fw-bold text-primary">Panel Kontrol Perangkat IoT & Admin NFC</h2>
-        <p class="text-center text-muted mb-5">Kontrol mode operasional perangkat secara *real-time* dan kelola data kartu akses pengguna.</p>
+  <!-- Main Content -->
+  <div id="mainPage" class="container" style="display:none;">
+    <section id="profile" class="profile" style="text-align:center;">
+      <h2>Profil Pengguna</h2>
+      <img src="assets/foto_yohannes.jpg" alt="Foto Yohannes">
+      <p><b>Nama:</b> Yohannes</p>
+      <p><b>Role:</b> Admin</p>
+    </section>
 
-        <div class="row">
-            <!-- Kolom Kiri: Device Control -->
-            <div class="col-lg-6">
-                <h3 class="mb-4 text-secondary"><i class="fa-solid fa-microchip me-2"></i> Kontrol Mode Otomatis</h3>
+    <hr>
 
-                <!-- Card 1: Camera Status (REVISED PATH) -->
-                <div class="card control-card p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="card-title mb-0"><i class="fa-solid fa-camera me-2 text-primary"></i> Mode Kamera</h5>
-                        <span id="camera-status-label" class="badge badge-status bg-secondary">Memuat...</span>
-                    </div>
-                    <hr>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <label class="form-check-label me-3 fw-bold" for="cameraToggle">Mode Otomatis / Manual</label>
-                        <div class="form-check form-switch">
-                            <!-- Toggle OFF = Merah/Manual, Toggle ON = Hijau/Otomatis -->
-                            <input class="form-check-input" type="checkbox" id="cameraToggle" onclick="toggleCamera(this.checked)">
-                        </div>
-                    </div>
-                    <small class="text-muted mt-2">Mode Otomatis (Hijau) mengirim perintah ON ke perangkat.</small>
-                </div>
+    <section id="gallery-section">
+      <h2 style="text-align:center;">Galeri Foto</h2>
+      <div id="gallery"></div>
+    </section>
+  </div>
 
-                <!-- Card 2: Solenoid Status (REVISED PATH) -->
-                <div class="card control-card p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="card-title mb-0"><i class="fa-solid fa-door-closed me-2 text-success"></i> Status Kunci Pintu</h5>
-                        <span id="solenoid-status-label" class="badge badge-status bg-secondary">Memuat...</span>
-                    </div>
-                    <hr>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <label class="form-check-label me-3 fw-bold" for="solenoidToggle">Kontrol Otomatis / Terkunci</label>
-                        <div class="form-check form-switch">
-                            <!-- Toggle OFF = Merah/Terbuka (Danger), Toggle ON = Hijau/Terkunci (Secure) -->
-                            <input class="form-check-input" type="checkbox" id="solenoidToggle" onclick="toggleSolenoid(this.checked)">
-                        </div>
-                    </div>
-                    <small class="text-muted mt-2">Kunci: Hijau=Terkunci (Aman). Merah=Terbuka (Akses Diberikan/Error).</small>
-                </div>
-                
-                <!-- Card 3: Dihapus sesuai revisi -->
-            </div>
-
-            <!-- Kolom Kanan: NFC Card Management -->
-            <div class="col-lg-6">
-                <h3 class="mb-4 text-warning"><i class="fa-solid fa-id-card me-2"></i> Manajemen Kartu Akses</h3>
-
-                <!-- Card 4: Add New NFC Card -->
-                <div class="card control-card p-4 border-success">
-                    <h5 class="card-title mb-3 text-success"><i class="fa-solid fa-plus-circle me-2"></i> Tambah Kartu Akses Baru</h5>
-                    <p class="text-muted">Masukkan Nama dan UID kartu. UID harus sama persis dengan yang dibaca oleh ESP32.</p>
-                    <div class="mb-3">
-                        <label for="nfcName" class="form-label">Nama Pengguna</label>
-                        <input type="text" class="form-control" id="nfcName" placeholder="Contoh: Budi Santoso">
-                    </div>
-                    <div class="mb-3">
-                        <label for="nfcUID" class="form-label">UID Kartu NFC</label>
-                        <input type="text" class="form-control" id="nfcUID" placeholder="Masukkan UID tanpa spasi/dash, misal: A1B2C3D4">
-                    </div>
-                    <button class="btn btn-success w-100" onclick="addNFCCard()">
-                        <i class="fa-solid fa-floppy-disk me-2"></i> Simpan Data Kartu
-                    </button>
-                    <p id="nfc-message" class="text-center mt-3 fw-bold"></p>
-                </div>
-                
-                <!-- Card 5: Daftar Kartu Terdaftar -->
-                <div class="card control-card p-4">
-                    <h5 class="card-title mb-3"><i class="fa-solid fa-list-ul me-2 text-warning"></i> Daftar Kartu Akses Terdaftar</h5>
-                    <div id="nfc-list-container" class="list-group">
-                        <p class="text-center text-muted">Memuat daftar kartu...</p>
-                        <!-- Card list will be inserted here -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-</main>
-
-<!-- Change Password Modal -->
-<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-warning text-white">
-                <h5 class="modal-title" id="changePasswordModalLabel">Ganti Password Akun Admin</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p class="text-muted">Masukkan kredensial lama dan password baru Anda untuk memperbarui data di database.</p>
-                <div class="mb-3">
-                    <label for="modalUsername" class="form-label">Username (UID)</label>
-                    <input type="text" class="form-control" id="modalUsername" placeholder="Username, misal: yohannes_ta">
-                </div>
-                <div class="mb-3">
-                    <label for="modalCurrentPassword" class="form-label">Password Lama</label>
-                    <input type="password" class="form-control" id="modalCurrentPassword" placeholder="Password Lama">
-                </div>
-                <div class="mb-3">
-                    <label for="modalNewPassword" class="form-label">Password Baru</label>
-                    <input type="password" class="form-control" id="modalNewPassword" placeholder="Password Baru (min 6 karakter)">
-                </div>
-                <p id="modal-password-message" class="text-danger"></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-success" onclick="executePasswordChange()">Konfirmasi Ganti Password</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- INTERNAL JAVASCRIPT (Menggabungkan script.js dan logika Control baru) -->
-<script>
-    // ==========================================================
-    // FUNGSI JAVASCRIPT & FIREBASE REALTIME DATABASE LOGIC
-    // ==========================================================
-
-    // ----------------------------------------------------
-    // --- 1. KONFIGURASI FIREBASE PROYEK ANDA ---
-    // ----------------------------------------------------
+  <script>
+    // --- Firebase Setup ---
     const firebaseConfig = {
-        apiKey: "AIzaSyB6r-4Eh6yez0-nPiDeRb64bVa1vGRrRGs",
-        databaseURL: "https://cameracctv-98b79-default-rtdb.firebaseio.com",
-        projectId: "cameracctv-98b79",
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      databaseURL: "YOUR_DATABASE_URL",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MSG_ID",
+      appId: "YOUR_APP_ID"
     };
+    firebase.initializeApp(firebaseConfig);
 
-    // Inisialisasi Firebase (Menggunakan firebase-app-compat yang sudah di-load)
-    const app = firebase.initializeApp(firebaseConfig);
-    const database = app.database();
+    const db = firebase.database();
 
-    let loggedInUsername = null; 
-
-    // ==========================================================
-    // FUNGSI UTILITY & TAMPILAN
-    // ==========================================================
-
-    function updateTime() {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const dateString = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-        document.getElementById('current-time').textContent = `${timeString} - ${dateString}`;
-    }
-
-    function showSection(sectionId) {
-        // Hide all content sections
-        document.querySelectorAll('.content-section').forEach(section => {
-            section.style.display = 'none';
-        });
-        // Show the target section
-        document.getElementById(sectionId).style.display = 'block';
-        
-        // Update active class in navbar
-        document.querySelectorAll('#auth-nav-links .nav-link').forEach(link => {
-            link.classList.remove('active');
-        });
-        const activeLink = document.querySelector(`#auth-nav-links a[onclick*="${sectionId}"]`);
-        if (activeLink) {
-            activeLink.classList.add('active');
-        }
-
-        // Load data if needed
-        if (sectionId === 'gallery-section') {
-            loadGallery();
-        } else if (sectionId === 'control-section') {
-            setupControlListeners(); 
-            loadNFCCards(); 
-        }
-    }
-
-    // ==========================================================
-    // FUNGSI OTENTIKASI (RTDB)
-    // ==========================================================
-
-    function updateAuthUI(isLoggedIn, username = '') {
-        const authButton = document.getElementById('auth-button');
-        const navLinks = document.getElementById('auth-nav-links');
-
-        if (isLoggedIn) {
-            authButton.textContent = 'Logout (' + username + ')';
-            authButton.classList.remove('btn-primary', 'btn-warning');
-            authButton.classList.add('btn-danger');
-            navLinks.style.display = 'flex';
-            
-            setupControlListeners(); 
-            loadNFCCards(); 
-            showSection('control-section');
-        } else {
-            authButton.textContent = 'Login';
-            authButton.classList.remove('btn-danger');
-            authButton.classList.add('btn-warning');
-            navLinks.style.display = 'none';
-            showSection('login-section');
-        }
-    }
-
-    function handleAuth() {
-        if (loggedInUsername) {
-            loggedInUsername = null;
-            updateAuthUI(false);
-        } else {
-            showSection('login-section');
-        }
-    }
-
+    // --- Login ---
     function login() {
-        const usernameInput = document.getElementById('username').value.trim();
-        const passwordInput = document.getElementById('password').value;
-        const errorElement = document.getElementById('auth-error');
-        errorElement.textContent = 'Validasi...';
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
 
-        database.ref('web_users/' + usernameInput).once('value')
-            .then((snapshot) => {
-                const userData = snapshot.val();
-                
-                if (userData && userData.password === passwordInput) {
-                    loggedInUsername = usernameInput;
-                    errorElement.textContent = '';
-                    updateAuthUI(true, usernameInput);
-                    
-                    document.getElementById('username').value = '';
-                    document.getElementById('password').value = '';
-                } else {
-                    errorElement.textContent = "Username atau Password salah. Silakan coba lagi.";
-                    loggedInUsername = null;
-                }
-            })
-            .catch((error) => {
-                console.error("FIREBASE CONNECTION ERROR:", error);
-                errorElement.textContent = "Error Koneksi ke Database. Cek Rules atau Jaringan.";
-            });
-    }
-
-    function executePasswordChange() {
-        const username = document.getElementById('modalUsername').value.trim();
-        const currentPassword = document.getElementById('modalCurrentPassword').value;
-        const newPassword = document.getElementById('modalNewPassword').value;
-        const messageElement = document.getElementById('modal-password-message');
-        messageElement.textContent = 'Memproses...';
-
-        if (!username || !currentPassword || newPassword.length < 6) {
-            messageElement.textContent = "Semua field harus diisi, dan password baru minimal 6 karakter.";
-            messageElement.style.color = 'var(--danger-color)';
-            return;
+      firebase.database().ref("akun_staff/" + user).once("value", snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          if (data.password === pass) {
+            document.getElementById("loginPage").style.display = "none";
+            document.getElementById("mainPage").style.display = "block";
+          } else {
+            alert("Password salah!");
+          }
+        } else {
+          alert("Akun tidak ditemukan!");
         }
-
-        database.ref('web_users/' + username).once('value')
-            .then((snapshot) => {
-                const userData = snapshot.val();
-                
-                if (!userData) {
-                    messageElement.textContent = "Username tidak ditemukan.";
-                    messageElement.style.color = 'var(--danger-color)';
-                } else if (userData.password === currentPassword) {
-                    database.ref('web_users/' + username + '/password').set(newPassword)
-                        .then(() => {
-                            messageElement.textContent = "Password berhasil diperbarui! ✅ Anda bisa login sekarang.";
-                            messageElement.style.color = 'var(--success-color)';
-                            
-                            document.getElementById('modalCurrentPassword').value = '';
-                            document.getElementById('modalNewPassword').value = '';
-                        })
-                        .catch(error => {
-                            messageElement.textContent = `Gagal menyimpan password baru: ${error.message}`;
-                            messageElement.style.color = 'var(--danger-color)';
-                        });
-                } else {
-                    messageElement.textContent = "Password lama salah untuk username ini.";
-                    messageElement.style.color = 'var(--danger-color)';
-                }
-            })
-            .catch(error => {
-                messageElement.textContent = `Error saat validasi: ${error.message}`;
-                messageElement.style.color = 'var(--danger-color)';
-            });
+      });
     }
 
-
-    // ==========================================================
-    // FUNGSI FIREBASE REALTIME DATABASE UNTUK GALERI
-    // ==========================================================
-        
-    function loadGallery() {
-        const historyRef = database.ref('camera/history'); 
-        const container = document.getElementById('history-container');
-        const statusEl = document.querySelector('#gallery-section .status');
-        container.innerHTML = ''; 
-        statusEl.textContent = "Memuat data dari Firebase...";
-
-        historyRef.limitToLast(20).once('value', (snapshot) => {
-            const historyData = snapshot.val();
-            
-            if (!historyData) {
-                 statusEl.textContent = "Galeri kosong. Belum ada data gambar dari ESP32.";
-                 return;
-            }
-
-            const entries = Object.entries(historyData).reverse(); 
-
-            entries.forEach(([nodeId, data]) => {
-                const base64Data = data.image_data;
-                const timestamp = data.timestamp; 
-                const uid = data.uid || 'N/A'; 
-                const name = data.name || 'Unknown User'; 
-                const accessStatus = data.access || 'LOG'; 
-
-                if (base64Data) {
-                    
-                    const dt = new Date(timestamp);
-                    const datePart = dt.toLocaleDateString('id-ID');
-                    const timePart = dt.toLocaleTimeString('id-ID');
-                    
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'imageItem';
-                    
-                    let borderColor = 'lightgray';
-                    if (accessStatus === 'GRANTED') {
-                        borderColor = 'var(--success-color)';
-                    } else if (accessStatus === 'DENIED') {
-                        borderColor = 'var(--danger-color)';
-                    }
-                    itemDiv.style.border = `2px solid ${borderColor}`;
-                    
-                    const imgElement = document.createElement('img');
-                    imgElement.src = base64Data;
-                    imgElement.className = 'historyImage';
-                    
-                    const infoDiv = document.createElement('div');
-                    infoDiv.className = 'image-info';
-
-                    const nameInfo = document.createElement('p');
-                    nameInfo.innerHTML = `<strong>👤 Nama:</strong> <span style="color: ${accessStatus === 'DENIED' ? 'var(--danger-color)' : 'var(--untirta-blue)'}">${name} (${accessStatus})</span>`;
-                    
-                    const uidInfo = document.createElement('p');
-                    uidInfo.innerHTML = `<strong>🆔 UID:</strong> ${uid}`;
-                    
-                    const dateInfo = document.createElement('p');
-                    dateInfo.innerHTML = `<strong>📅 Tanggal:</strong> ${datePart}`;
-                    
-                    const timeInfo = document.createElement('p');
-                    timeInfo.innerHTML = `<strong>⏱️ Jam:</strong> ${timePart}`;
-
-                    infoDiv.appendChild(nameInfo); 
-                    infoDiv.appendChild(uidInfo);
-                    infoDiv.appendChild(dateInfo); 
-                    infoDiv.appendChild(timeInfo); 
-                    
-                    itemDiv.appendChild(imgElement);
-                    itemDiv.appendChild(infoDiv);
-
-                    container.appendChild(itemDiv); 
-                }
-            });
-            
-            statusEl.textContent = `Berhasil memuat ${entries.length} log terakhir.`;
-
-        }, (error) => {
-            console.error("Firebase read failed: ", error);
-            statusEl.textContent = "ERROR: Gagal memuat galeri dari Firebase.";
-        });
+    function logout() {
+      document.getElementById("mainPage").style.display = "none";
+      document.getElementById("loginPage").style.display = "block";
     }
 
-    // ==========================================================
-    // FUNGSI KONTROL PERANGKAT (MENULIS KE RTDB)
-    // ==========================================================
+    // --- Galeri Foto ---
+    const galleryRef = firebase.database().ref("galeri");
+    const galleryDiv = document.getElementById("gallery");
 
-    // PATH UNTUK MENGIRIM PERINTAH KONTROL KE PERANGKAT
-    const RTDB_CONTROL_PATH = 'control_state'; 
-    // PATH BARU UNTUK MEMBACA STATUS FEEDBACK DARI PERANGKAT
-    const RTDB_STATUS_PATH = 'status_output';
+    galleryRef.on("value", snapshot => {
+      galleryDiv.innerHTML = "";
+      snapshot.forEach(child => {
+        const key = child.key;
+        const url = child.val();
 
-    /**
-     * Mengirim perintah 'ON' (Otomatis) atau 'OFF' (Manual/Mati) ke perangkat.
-     * Perintah ditulis ke control_state/camera_status (Path lama)
-     */
-    window.toggleCamera = function(isChecked) {
-        // ON/Checked = Otomatis, OFF/Unchecked = Manual/Mati
-        const status = isChecked ? "ON" : "OFF";
-        database.ref(RTDB_CONTROL_PATH + '/camera_status').set(status)
-            .then(() => console.log(`Perintah Admin: Camera mode set to: ${status}`))
-            .catch(error => console.error("Error setting camera control status:", error));
-    }
+        const container = document.createElement("div");
+        container.className = "gallery-item";
 
-    /**
-     * Mengirim perintah 'CLOSE' (Terkunci) atau 'OPEN' (Terbuka/Manual) ke perangkat.
-     * Perintah ditulis ke control_state/solenoid_status (Path lama)
-     */
-    window.toggleSolenoid = function(isChecked) {
-        // CLOSE/Checked = Terkunci/Aman, OPEN/Unchecked = Terbuka/Bahaya
-        const status = isChecked ? "CLOSE" : "OPEN";
-        database.ref(RTDB_CONTROL_PATH + '/solenoid_status').set(status)
-            .then(() => console.log(`Perintah Admin: Solenoid control set to: ${status}`))
-            .catch(error => console.error("Error setting solenoid control status:", error));
-    }
+        const img = document.createElement("img");
+        img.src = url;
 
+        const del = document.createElement("button");
+        del.innerHTML = "🗑️";
+        del.onclick = () => {
+          if (confirm("Hapus foto ini?")) {
+            firebase.database().ref("galeri/" + key).remove();
+            container.remove();
+          }
+        };
 
-    // ==========================================================
-    // RTDB LISTENERS (REAL-TIME STATUS UPDATE)
-    // ==========================================================
-
-    let isControlListenersSetup = false;
-
-    function setupControlListeners() {
-        if (isControlListenersSetup) return;
-
-        // REVISI PATH: Mengambil status aktual dari status_output
-        const cameraRef = database.ref(RTDB_STATUS_PATH + '/status_camera');
-        const solenoidRef = database.ref(RTDB_STATUS_PATH + '/status_solenoid');
-        
-        // Catatan: Walaupun kita membaca dari status_output, kita tetap mengontrol toggle 
-        // dengan toggleCamera/toggleSolenoid yang menulis ke control_state.
-
-        // 1. Camera Listener (MEMBACA status_output/status_camera)
-        cameraRef.on('value', (snapshot) => {
-            const status = snapshot.val();
-            const label = document.getElementById('camera-status-label');
-            const toggle = document.getElementById('cameraToggle');
-
-            if (status === 'ON') {
-                label.textContent = 'OTOMATIS AKTIF';
-                label.className = 'badge badge-status bg-success'; // HIJAU
-                toggle.checked = true;
-            } else if (status === 'OFF') {
-                label.textContent = 'MANUAL / MATI';
-                label.className = 'badge badge-status bg-danger'; // MERAH
-                toggle.checked = false;
-            } else {
-                label.textContent = 'LOADING';
-                label.className = 'badge badge-status bg-secondary';
-                toggle.checked = false;
-            }
-        });
-
-        // 2. Solenoid Listener (MEMBACA status_output/status_solenoid)
-        solenoidRef.on('value', (snapshot) => {
-            const status = snapshot.val();
-            const label = document.getElementById('solenoid-status-label');
-            const toggle = document.getElementById('solenoidToggle');
-            
-            // Interpretasi: CLOSE = Terkunci/Aman (Hijau), OPEN = Terbuka/Bahaya (Merah)
-            if (status === 'CLOSE') {
-                label.textContent = 'TERKUNCI (AMAN)';
-                label.className = 'badge badge-status bg-success'; // HIJAU
-                toggle.checked = true; // Status terkunci dianggap mode aktif/normal
-            } else if (status === 'OPEN') {
-                label.textContent = 'TERBUKA (BAHAYA)';
-                label.className = 'badge badge-status bg-danger'; // MERAH
-                toggle.checked = false; // Status terbuka dianggap mode tidak aman/manual
-            } else {
-                label.textContent = 'LOADING';
-                label.className = 'badge badge-status bg-secondary';
-                toggle.checked = false;
-            }
-        });
-        
-        isControlListenersSetup = true;
-    }
-
-
-    // ==========================================================
-    // FUNGSI ADMIN NFC
-    // ==========================================================
-
-    const NFC_USERS_PATH = 'nfc_users';
-    
-    /**
-     * Menambahkan data kartu baru (Nama dan UID) ke RTDB.
-     */
-    window.addNFCCard = function() {
-        const name = document.getElementById('nfcName').value.trim();
-        let uid = document.getElementById('nfcUID').value.trim().toUpperCase();
-        const messageElement = document.getElementById('nfc-message');
-        messageElement.textContent = 'Memproses...';
-        messageElement.style.color = 'inherit';
-
-        // Bersihkan spasi/dash, ini penting agar format UID konsisten
-        uid = uid.replace(/[^0-9A-F]/g, '');
-
-        if (!name || uid.length === 0) {
-            messageElement.textContent = "Nama dan UID Kartu wajib diisi.";
-            messageElement.style.color = 'var(--danger-color)';
-            return;
-        }
-
-        // Simpan data di path nfc_users/<UID>
-        database.ref(NFC_USERS_PATH + '/' + uid).set({
-            name: name,
-            registered_by: loggedInUsername, // Optional: siapa yang mendaftarkan
-            registered_at: new Date().toISOString()
-        })
-        .then(() => {
-            messageElement.textContent = `Kartu ${name} (UID: ${uid}) berhasil didaftarkan! ✅`;
-            messageElement.style.color = 'var(--success-color)';
-            document.getElementById('nfcName').value = '';
-            document.getElementById('nfcUID').value = '';
-            // Data akan otomatis terupdate di daftar karena adanya listener
-        })
-        .catch(error => {
-            messageElement.textContent = `Gagal menyimpan data: ${error.message}`;
-            messageElement.style.color = 'var(--danger-color)';
-        });
-    }
-
-    /**
-     * Menghapus data kartu dari RTDB.
-     */
-    window.deleteNFCCard = function(uid, name) {
-        // Ganti alert() dengan konfirmasi custom jika diperlukan. 
-        // Untuk saat ini, kita pakai confirm() untuk kemudahan.
-        if (confirm(`Apakah Anda yakin ingin menghapus kartu akses milik ${name} (UID: ${uid})?`)) {
-            database.ref(NFC_USERS_PATH + '/' + uid).remove()
-                .then(() => {
-                    const messageElement = document.getElementById('nfc-message');
-                    messageElement.textContent = `Kartu ${name} berhasil dihapus. 🗑️`;
-                    messageElement.style.color = 'var(--warning-color)';
-                })
-                .catch(error => {
-                    console.error(`Gagal menghapus data: ${error.message}`);
-                    const messageElement = document.getElementById('nfc-message');
-                    messageElement.textContent = `Gagal menghapus data: ${error.message}`;
-                    messageElement.style.color = 'var(--danger-color)';
-                });
-        }
-    }
-
-
-    /**
-     * Memuat daftar kartu NFC secara real-time.
-     */
-    function loadNFCCards() {
-        const listContainer = document.getElementById('nfc-list-container');
-        // Pastikan listener hanya dipasang sekali
-        if (listContainer.dataset.listenerAttached) return;
-
-        listContainer.innerHTML = '<p class="text-center text-muted">Memuat daftar kartu...</p>';
-        
-        database.ref(NFC_USERS_PATH).on('value', (snapshot) => {
-            const usersData = snapshot.val();
-            listContainer.innerHTML = '';
-            
-            if (!usersData) {
-                listContainer.innerHTML = '<p class="text-center text-muted">Belum ada kartu terdaftar.</p>';
-                return;
-            }
-
-            const cardUids = Object.keys(usersData).sort(); // Sort by UID
-            
-            cardUids.forEach(uid => {
-                const userData = usersData[uid];
-                
-                const item = document.createElement('div');
-                item.className = 'list-group-item d-flex justify-content-between align-items-center';
-                item.style.backgroundColor = '#f1f8ff';
-                item.style.borderRadius = '8px';
-                item.style.marginBottom = '8px';
-
-                item.innerHTML = `
-                    <div>
-                        <strong class="text-primary">${userData.name}</strong><br>
-                        <small class="text-muted"><i class="fa-solid fa-tag me-1"></i> UID: ${uid}</small>
-                    </div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteNFCCard('${uid}', '${userData.name}')">
-                        <i class="fa-solid fa-trash-alt"></i> Hapus
-                    </button>
-                `;
-                listContainer.appendChild(item);
-            });
-        });
-        listContainer.dataset.listenerAttached = 'true';
-    }
-
-    // ==========================================================
-    // INISIALISASI
-    // ==========================================================
-
-    document.addEventListener('DOMContentLoaded', () => {
-        // Set up time update loop
-        setInterval(updateTime, 1000);
-        updateTime(); 
-        
-        // Initial UI state check (shows login form)
-        updateAuthUI(false); 
+        container.appendChild(img);
+        container.appendChild(del);
+        galleryDiv.appendChild(container);
+      });
     });
-</script>
-
+  </script>
 </body>
 </html>
