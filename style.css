@@ -1,0 +1,165 @@
+:root {
+  --untirta-blue: #004d9c;
+  --primary-bg: #f8f9fa;
+  --warning-color: #ffc107;
+  --success-color: #198754;
+  --danger-color: #dc3545;
+}
+body {
+  padding-top: 65px;
+  background-color: var(--primary-bg);
+  font-family: "Inter", sans-serif;
+}
+.navbar {
+  background-color: var(--untirta-blue) !important;
+}
+.logo_untirta {
+  height: 40px;
+  margin-right: 12px;
+}
+.navbar-time {
+  color: white;
+  margin-right: 15px;
+  font-weight: 500;
+}
+
+/* Profil */
+.profile-img {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 6px solid var(--warning-color);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  padding: 3px;
+}
+.info-card {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  margin-bottom: 30px;
+  background: #fff;
+}
+
+.deskripsi-project {
+  font-size: 1.1em;
+  line-height: 1.6;
+  text-align: justify;
+  margin-bottom: 2 rem;
+  color: #333;
+  background-color: #f4f4f4; /* Warna abu-abu terang */
+  padding: 15px; /* Jarak antara teks dan tepi background */
+  border-radius: 8px; /* Membuat sudut lebih halus (opsional) */
+}
+
+/* Login */
+.login-card {
+  max-width: 450px;
+  margin: 80px auto;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+.login-card-header {
+  background-color: var(--untirta-blue);
+  color: white;
+  padding: 20px 0;
+  text-align: center;
+}
+.login-logo-large {
+  height: 80px;
+  margin: 0 auto 10px auto;
+  display: block;
+}
+
+.content-section {
+  display: none;
+  padding: 20px 0;
+}
+
+/* Gallery */
+#history-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  padding-top: 20px;
+}
+.imageItem {
+  position: relative;
+  border: none;
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+  overflow: hidden;
+}
+.imageItem:hover {
+  transform: translateY(-5px);
+}
+.historyImage {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.image-info {
+  padding: 15px;
+  text-align: left;
+}
+
+/* Trash button on image */
+.trash-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+}
+.trash-btn:hover {
+  background: rgba(220, 53, 69, 0.9);
+}
+
+/* Control card */
+.control-card {
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+  margin-bottom: 20px;
+  background-color: white;
+}
+.control-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+.form-check-input {
+  width: 3.5rem;
+  height: 1.75rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+.form-switch .form-check-input {
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+.form-switch .form-check-input:checked {
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+}
+
+.badge-status {
+  font-size: 1em;
+  padding: 0.5em 1em;
+  border-radius: 0.5rem;
+  font-weight: 700;
+}
+.list-group-item {
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
