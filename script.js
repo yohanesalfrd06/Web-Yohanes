@@ -515,6 +515,69 @@ window.deleteNFCCard = function (uid, name) {
   }
 };
 
+/**
+ * [FUNGSI BARU] Membuka modal edit dan mengisinya dengan data
+ */
+function openEditNFCModal(uid, currentName) {
+  // Isi field di modal
+  document.getElementById("modalNFC_UID").value = uid;
+  document.getElementById("modalNFC_Name").value = currentName;
+
+  // Bersihkan pesan error/sukses sebelumnya
+  document.getElementById("modal-nfc-message").textContent = "";
+
+  // Tampilkan modal
+  var myModal = new bootstrap.Modal(document.getElementById("editNFCModal"));
+  myModal.show();
+}
+
+/**
+ * [FUNGSI BARU] Menyimpan perubahan nama dari modal
+ */
+function executeUpdateNFC() {
+  const uid = document.getElementById("modalNFC_UID").value;
+  const newName = document.getElementById("modalNFC_Name").value.trim();
+  const messageElement = document.getElementById("modal-nfc-message");
+  const saveBtn = document.getElementById("modal-nfc-save-btn");
+
+  if (!newName) {
+    messageElement.textContent = "Nama baru tidak boleh kosong.";
+    messageElement.style.color = "var(--danger-color)";
+    return;
+  }
+
+  // Nonaktifkan tombol agar tidak diklik dua kali
+  saveBtn.disabled = true;
+  saveBtn.textContent = "Menyimpan...";
+  messageElement.textContent = "Memproses...";
+  messageElement.style.color = "inherit";
+
+  // Kita gunakan .update() untuk hanya mengubah 'name'
+  // dan membiarkan 'registered_by' / 'registered_at' tetap ada.
+  database
+    .ref(NFC_USERS_PATH + "/" + uid)
+    .update({ name: newName }) // Hanya update field 'name'
+    .then(() => {
+      messageElement.textContent = "Nama berhasil diperbarui! ✅";
+      messageElement.style.color = "var(--success-color)";
+
+      // Tutup modal setelah 1.5 detik
+      setTimeout(() => {
+        var myModal = bootstrap.Modal.getInstance(document.getElementById("editNFCModal"));
+        myModal.hide();
+      }, 1500);
+    })
+    .catch((error) => {
+      messageElement.textContent = `Gagal menyimpan: ${error.message}`;
+      messageElement.style.color = "var(--danger-color)";
+    })
+    .finally(() => {
+      // Aktifkan kembali tombol
+      saveBtn.disabled = false;
+      saveBtn.textContent = "Simpan Perubahan";
+    });
+}
+
 function loadNFCCards() {
   const listContainer = document.getElementById("nfc-list-container");
   if (listContainer.dataset.listenerAttached === "true") return; // Sudah terpasang, jangan duplikat
@@ -536,14 +599,19 @@ function loadNFCCards() {
       item.style.borderRadius = "8px";
       item.style.marginBottom = "8px";
       item.innerHTML = `
-                <div>
-                    <strong class="text-primary">${userData.name}</strong><br>
-                    <small class="text-muted"><i class="fa-solid fa-tag me-1"></i> UID: ${uid}</small>
-                </div>
-                <button class="btn btn-sm btn-outline-danger" onclick="deleteNFCCard('${uid}', '${userData.name}')">
-                    <i class="fa-solid fa-trash-alt"></i> Hapus
-                </button>
-            `;
+                  <div>
+                      <strong class="text-primary">${userData.name}</strong><br>
+                      <small class="text-muted"><i class="fa-solid fa-tag me-1"></i> UID: ${uid}</small>
+                  </div>
+                  <div class="d-flex">
+                      <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditNFCModal('${uid}', '${userData.name}')">
+                          <i class="fa-solid fa-pencil"></i> Edit
+                      </button>
+                      <button class="btn btn-sm btn-outline-danger" onclick="deleteNFCCard('${uid}', '${userData.name}')">
+                          <i class="fa-solid fa-trash-alt"></i> Hapus
+                      </button>
+                  </div>
+              `;
       listContainer.appendChild(item);
     });
   });
