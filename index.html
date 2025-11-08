@@ -38,7 +38,7 @@
     </nav>
 
     <main class="container mt-5">
-      <div id="login-section" class="card login-card content-section" style="display: block">
+      <div id="login-section" class="card login-card content-section" style="display: none">
         <div class="login-card-header text-center">
           <img src="assets/logo_untirta.png" alt="Logo UNTIRTA" class="login-logo-large rounded-circle" />
           <h4 class="mt-2">Portal Admin TA S1</h4>
@@ -59,7 +59,7 @@
         </div>
       </div>
 
-      <div id="profile-section" class="content-section">
+      <div id="profile-section" class="content-section" style="display: none">
         <div class="row justify-content-center">
           <div class="col-md-10">
             <div class="card info-card p-5 text-center">
@@ -69,13 +69,15 @@
               <h2 class="h5 text-muted mb-4">Mahasiswa S1 Teknik Elektro UNTIRTA</h2>
 
               <p class="deskripsi-project">
-                Aplikasi sistem monitoring ini dibuat oleh <strong>Yohanes Alfredo</strong> untuk memenuhi Tugas Akhir Strata Satu (S1) di Jurusan Teknik Elektro, Universitas Sultan Ageng Tirtayasa (UNTIRTA). Sistem ini berfungsi untuk
+                Aplikasi sistem monitoring ini dibuat oleh <strong>Yohannes Alfredo</strong> untuk memenuhi Tugas Akhir Strata Satu (S1) di Jurusan Teknik Elektro, Universitas Sultan Ageng Tirtayasa (UNTIRTA). Sistem ini berfungsi untuk
                 memantau perangkat IoT secara realtime melalui Firebase Realtime Database dan menampilkan data historis gambar. Penelitian dilakukan pada area kontainer di lingkungan Fakultas Teknik, UNTIRTA.
               </p>
 
               <hr />
               <p class="text-start"><i class="fa-solid fa-graduation-cap me-2 text-primary"></i> NIM: <strong>3332200045</strong></p>
               <p class="text-start"><i class="fa-solid fa-building-columns me-2 text-primary"></i> Jurusan: <strong>Teknik Elektro</strong></p>
+              <p class="text-start"><i class="fa-solid fa-house me-2 text-primary"></i> Alamat: <strong>Jalan Haji Sanusi, Kecamatan Kramatwatu, Kabupaten Serang - Banten. 42161 </strong></p>
+
               <hr />
               <p class="mb-1">Pembimbing 1: <strong>Prof. Dr. Alimuddin, S.T., M.M., M.T.</strong><br /></p>
               <p class="mb-0">Pembimbing 2: <strong>H. Alief Maulana, S.T., M.T</strong></p>
@@ -84,13 +86,13 @@
         </div>
       </div>
 
-      <div id="gallery-section" class="content-section">
+      <div id="gallery-section" class="content-section" style="display: none">
         <h2 class="mb-4 text-center">Galeri Riwayat Foto dari ESP32</h2>
         <p class="status text-center text-muted" id="gallery-status">Memuat data...</p>
         <div id="history-container"></div>
       </div>
 
-      <div id="control-section" class="content-section">
+      <div id="control-section" class="content-section" style="display: none">
         <h2 class="mb-4 text-center fw-bold text-primary">Panel Kontrol Perangkat IoT & Admin NFC</h2>
         <p class="text-center text-muted mb-5">Kontrol mode operasional perangkat secara realtime dan kelola data kartu akses pengguna.</p>
 
@@ -137,8 +139,14 @@
               </div>
               <div class="mb-3">
                 <label for="nfcUID" class="form-label">UID Kartu NFC</label>
-                <input type="text" class="form-control" id="nfcUID" placeholder="Masukkan UID tanpa spasi/dash, misal: A1B2C3D4" />
+                <input type="text" class="form-control" id="nfcUID" placeholder="Masukkan UID tanpa spasi/dash, contoh: A1B2C3D4" />
               </div>
+
+              <div class="mb-3">
+                <label for="nfcPhone" class="form-label">Nomor Handphone (Opsional)</label>
+                <input type="tel" class="form-control" id="nfcPhone" placeholder="Contoh: 08123456789" />
+              </div>
+
               <button class="btn btn-success w-100" onclick="addNFCCard()"><i class="fa-solid fa-floppy-disk me-2"></i> Simpan Data Kartu</button>
               <p id="nfc-message" class="text-center mt-3 fw-bold"></p>
             </div>
@@ -185,17 +193,16 @@
       </div>
     </div>
 
-    <!--Modal untuk mengedit data kartu NFC */ --> 
     <div class="modal fade" id="editNFCModal" tabindex="-1" aria-labelledby="editNFCModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header bg-primary text-white">
-            <h5 class="modal-title" id="editNFCModalLabel">Edit Nama Kartu Akses</h5>
+            <h5 class="modal-title" id="editNFCModalLabel">Edit Data Kartu Akses</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <p class="text-muted">Perbarui nama yang terkait dengan UID kartu ini.</p>
-            
+            <p class="text-muted">Perbarui data yang terkait dengan UID kartu ini.</p>
+
             <div class="mb-3">
               <label for="modalNFC_UID" class="form-label">UID Kartu (Read-Only)</label>
               <input type="text" class="form-control" id="modalNFC_UID" readonly disabled />
@@ -206,13 +213,16 @@
               <input type="text" class="form-control" id="modalNFC_Name" placeholder="Masukkan nama baru" />
             </div>
 
+            <div class="mb-3">
+              <label for="modalNFC_Phone" class="form-label">Nomor Handphone Baru</label>
+              <input type="tel" class="form-control" id="modalNFC_Phone" placeholder="Masukkan nomor HP baru" />
+            </div>
+
             <p id="modal-nfc-message" class="text-danger"></p>
           </div>
           <div class="modal-footer">
-            <button type_button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-            <button type="button" class="btn btn-success" id="modal-nfc-save-btn" onclick="executeUpdateNFC()">
-              Simpan Perubahan
-            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="button" class="btn btn-success" id="modal-nfc-save-btn" onclick="executeUpdateNFC()">Simpan Perubahan</button>
           </div>
         </div>
       </div>

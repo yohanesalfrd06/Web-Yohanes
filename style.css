@@ -40,15 +40,18 @@ body {
   background: #fff;
 }
 
+/* Deskripsi Proyek (Diperbarui) */
 .deskripsi-project {
   font-size: 1.1em;
   line-height: 1.6;
   text-align: justify;
-  margin-bottom: 2 rem;
+  margin-bottom: 2rem;
   color: #333;
-  background-color: #f4f4f4; /* Warna abu-abu terang */
-  padding: 15px; /* Jarak antara teks dan tepi background */
-  border-radius: 8px; /* Membuat sudut lebih halus (opsional) */
+
+  /* Latar belakang abu-abu */
+  background-color: #f4f4f4;
+  padding: 15px;
+  border-radius: 8px;
 }
 
 /* Login */
@@ -103,6 +106,9 @@ body {
 .image-info {
   padding: 15px;
   text-align: left;
+}
+.image-info p {
+  margin-bottom: 5px; /* Mengurangi jarak antar baris info */
 }
 
 /* Trash button on image */
@@ -159,6 +165,7 @@ body {
   border-radius: 0.5rem;
   font-weight: 700;
 }
+/* Penyesuaian untuk daftar NFC agar tombol pas */
 .list-group-item {
   border-radius: 8px;
   border: 1px solid #e0e0e0;

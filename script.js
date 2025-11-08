@@ -25,47 +25,38 @@ function handleRouteChange() {
   const isLoggedIn = loggedInUsername !== null;
 
   // 1. Perbarui UI Header (Tombol Login/Logout & Tampilkan/Sembunyikan Nav)
-  // Ini dipanggil setiap saat agar UI selalu konsisten
   updateAuthUI(isLoggedIn, loggedInUsername);
 
   if (isLoggedIn) {
     // --- PENGGUNA SUDAH LOGIN ---
     if (hash === "#login") {
-      // Jika sudah login tapi mencoba ke #login, paksa ke #control
-      window.location.hash = "#control"; // Ini akan memicu handleRouteChange() lagi
+      window.location.hash = "#control";
       return;
     }
 
-    // Tampilkan section berdasarkan hash (misal: #profile -> "profile-section")
     let pageId = hash.substring(1) + "-section";
 
-    // Pastikan section-nya valid, jika tidak, ke default (#control)
     if (!document.getElementById(pageId)) {
       pageId = "control-section";
-      window.location.hash = "control"; // Perbaiki URL jika hash tidak valid
+      window.location.hash = "control";
     }
 
-    // Tampilkan konten yang diminta
     showSection(pageId);
   } else {
     // --- PENGGUNA BELUM LOGIN ---
-    // Paksa tampilkan "login-section", APAPUN hash-nya
     showSection("login-section");
 
-    // Dan pastikan URL-nya bersih (hanya #login)
     if (hash !== "#login") {
       window.location.hash = "#login";
     }
 
-    // Matikan semua listener Firebase jika user logout / di-force ke login
-    // Ini penting untuk efisiensi dan menghindari error
+    // Matikan semua listener Firebase jika user logout
     detachAllListeners();
   }
 }
 
 /**
  * FUNGSI BARU: Untuk mematikan semua listener Firebase.
- * Dipanggil saat user logout atau dipaksa ke halaman login.
  */
 function detachAllListeners() {
   if (isControlListenersSetup) {
@@ -89,7 +80,6 @@ function detachAllListeners() {
 // ==========================================================
 
 /**
- * (Disederhanakan)
  * HANYA mengurus tampilan KONTEN UTAMA dan memuat data yang relevan.
  */
 function showSection(sectionId) {
@@ -103,25 +93,24 @@ function showSection(sectionId) {
   // 3. Perbarui 'active' class di navigasi
   document.querySelectorAll("#auth-nav-links .nav-link").forEach((link) => {
     link.classList.remove("active");
-    // Gunakan data-page yang kita set di HTML
     if (link.dataset.page === sectionId) {
       link.classList.add("active");
     }
   });
 
-  // 4. Muat data jika perlu (logic ini tetap sama)
+  // 4. Muat data jika perlu (dicek agar tidak duplikat listener)
   if (sectionId === "gallery-section" && !historyListenerAttached) {
     loadGallery();
   }
-  if (sectionId === "control-section" && !isControlListenersSetup) {
-    setupControlListeners();
-    loadNFCCards();
+  if (sectionId === "control-section") {
+    if (!isControlListenersSetup) setupControlListeners();
+    if (document.getElementById("nfc-list-container").dataset.listenerAttached !== "true") {
+      loadNFCCards();
+    }
   }
-  // (Perhatikan: Saya menambahkan '&& !listenerAttached' agar tidak memuat ulang data jika sudah ada)
 }
 
 /**
- * (Disederhanakan)
  * HANYA mengurus tampilan HEADER/NAVBAR (Tombol Login/Logout).
  */
 function updateAuthUI(isLoggedIn, username = "") {
@@ -142,18 +131,15 @@ function updateAuthUI(isLoggedIn, username = "") {
 }
 
 /**
- * (Diperbarui)
  * Cek session di localStorage.
- * Fungsi ini TIDAK lagi memanggil updateAuthUI.
- * Fungsi ini HANYA mengatur global state 'loggedInUsername'.
  */
 function checkSession() {
   const storedUsername = localStorage.getItem("sessionUser");
   const storedTimestamp = localStorage.getItem("sessionTimestamp");
 
   if (!storedUsername || !storedTimestamp) {
-    loggedInUsername = null; // Pastikan state jelas
-    return; // Selesai, 'handleRouteChange' akan menangani sisanya
+    loggedInUsername = null;
+    return;
   }
 
   const fiveMinutes = 5 * 60 * 1000;
@@ -161,13 +147,11 @@ function checkSession() {
   const timeElapsed = now - parseInt(storedTimestamp, 10);
 
   if (timeElapsed < fiveMinutes) {
-    // BELUM 5 MENIT: Anggap masih login
-    loggedInUsername = storedUsername; // <-- PENTING: Set global state
+    loggedInUsername = storedUsername;
   } else {
-    // SUDAH 5 MENIT: Anggap sudah logout
     localStorage.removeItem("sessionUser");
     localStorage.removeItem("sessionTimestamp");
-    loggedInUsername = null; // <-- PENTING: Clear global state
+    loggedInUsername = null;
   }
 }
 
@@ -176,31 +160,23 @@ function checkSession() {
 // ==========================================================
 
 /**
- * (Diperbarui)
- * Saat logout, HANYA clear state dan ubah hash.
- * Router akan menangani perubahan UI.
+ * Mengurus klik tombol Login/Logout.
  */
 function handleAuth() {
   if (loggedInUsername) {
     // --- Log Out ---
     localStorage.removeItem("sessionUser");
     localStorage.removeItem("sessionTimestamp");
-    loggedInUsername = null; // Clear global state
-
-    // JANGAN panggil updateAuthUI() atau showSection()
-    // Cukup ubah hash. Router akan menangani sisanya.
+    loggedInUsername = null;
     window.location.hash = "#login";
   } else {
     // --- Tombol Login diklik ---
-    // (Seharusnya user sudah di #login, tapi untuk keamanan)
     window.location.hash = "#login";
   }
 }
 
 /**
- * (Diperbarui)
- * Saat login sukses, HANYA set state dan ubah hash.
- * Router akan menangani perubahan UI.
+ * Memproses upaya login.
  */
 function login() {
   const usernameInput = document.getElementById("username").value.trim();
@@ -219,13 +195,11 @@ function login() {
         localStorage.setItem("sessionUser", usernameInput);
         localStorage.setItem("sessionTimestamp", now);
 
-        loggedInUsername = usernameInput; // Set global state
+        loggedInUsername = usernameInput;
         errorElement.textContent = "";
         document.getElementById("username").value = "";
         document.getElementById("password").value = "";
 
-        // JANGAN panggil updateAuthUI() atau showSection()
-        // Cukup ubah hash. Router akan menangani sisanya.
         window.location.hash = "#control";
       } else {
         // --- Login Gagal ---
@@ -242,10 +216,7 @@ function login() {
 }
 
 // ==========================================================
-// FUNGSI LAIN (TIDAK BERUBAH)
-// (Termasuk updateTime, executePasswordChange, loadGallery,
-// deleteGalleryNode, toggleCamera, toggleSolenoid,
-// setupControlListeners, addNFCCard, deleteNFCCard, loadNFCCards)
+// FUNGSI LAIN (Utility, Galeri, Kontrol, NFC)
 // ==========================================================
 
 function updateTime() {
@@ -304,7 +275,7 @@ function executePasswordChange() {
 // --- GALERI ---
 let historyListenerAttached = false;
 function loadGallery() {
-  if (historyListenerAttached) return; // Sudah terpasang, jangan duplikat
+  if (historyListenerAttached) return;
 
   const historyRef = database.ref("camera/history");
   const container = document.getElementById("history-container");
@@ -422,12 +393,13 @@ window.toggleSolenoid = function (isChecked) {
 };
 
 function setupControlListeners() {
-  if (isControlListenersSetup) return; // Sudah terpasang, jangan duplikat
+  if (isControlListenersSetup) return;
 
   database.ref(RTDB_STATUS_PATH + "/status_camera").on("value", (snapshot) => {
     const status = snapshot.val();
     const label = document.getElementById("camera-status-label");
     const toggle = document.getElementById("cameraToggle");
+    if (!label || !toggle) return; // Tambahkan penjaga jika elemen tidak ada
     if (status === "ON") {
       label.textContent = "OTOMATIS AKTIF";
       label.className = "badge badge-status bg-success";
@@ -446,6 +418,7 @@ function setupControlListeners() {
     const status = snapshot.val();
     const label = document.getElementById("solenoid-status-label");
     const toggle = document.getElementById("solenoidToggle");
+    if (!label || !toggle) return; // Tambahkan penjaga jika elemen tidak ada
     if (status === "CLOSE") {
       label.textContent = "TERKUNCI (AMAN)";
       label.className = "badge badge-status bg-success";
@@ -462,25 +435,33 @@ function setupControlListeners() {
   isControlListenersSetup = true;
 }
 
-// --- NFC ---
+// --- NFC (Diperbarui) ---
 const NFC_USERS_PATH = "nfc_users";
 
+/**
+ * Tambah Kartu NFC (Diperbarui dengan No. HP)
+ */
 window.addNFCCard = function () {
   const name = document.getElementById("nfcName").value.trim();
   let uid = document.getElementById("nfcUID").value.trim().toUpperCase();
+  const phone = document.getElementById("nfcPhone").value.trim(); // Ambil No. HP
   const messageElement = document.getElementById("nfc-message");
+
   messageElement.textContent = "Memproses...";
   messageElement.style.color = "inherit";
   uid = uid.replace(/[^0-9A-F]/g, "");
+
   if (!name || uid.length === 0) {
     messageElement.textContent = "Nama dan UID Kartu wajib diisi.";
     messageElement.style.color = "var(--danger-color)";
     return;
   }
+
   database
     .ref(NFC_USERS_PATH + "/" + uid)
     .set({
       name: name,
+      phone: phone, // Simpan No. HP
       registered_by: loggedInUsername,
       registered_at: new Date().toISOString(),
     })
@@ -489,6 +470,7 @@ window.addNFCCard = function () {
       messageElement.style.color = "var(--success-color)";
       document.getElementById("nfcName").value = "";
       document.getElementById("nfcUID").value = "";
+      document.getElementById("nfcPhone").value = ""; // Kosongkan No. HP
     })
     .catch((error) => {
       messageElement.textContent = `Gagal menyimpan data: ${error.message}`;
@@ -496,6 +478,9 @@ window.addNFCCard = function () {
     });
 };
 
+/**
+ * Hapus Kartu NFC
+ */
 window.deleteNFCCard = function (uid, name) {
   if (confirm(`Apakah Anda yakin ingin menghapus kartu akses milik ${name} (UID: ${uid})?`)) {
     database
@@ -503,40 +488,43 @@ window.deleteNFCCard = function (uid, name) {
       .remove()
       .then(() => {
         const messageElement = document.getElementById("nfc-message");
-        messageElement.textContent = `Kartu ${name} berhasil dihapus. 🗑️`;
-        messageElement.style.color = "var(--warning-color)";
+        if (messageElement) {
+          // Cek jika elemen ada
+          messageElement.textContent = `Kartu ${name} berhasil dihapus. 🗑️`;
+          messageElement.style.color = "var(--warning-color)";
+        }
       })
       .catch((error) => {
         console.error(`Gagal menghapus data: ${error.message}`);
         const messageElement = document.getElementById("nfc-message");
-        messageElement.textContent = `Gagal menghapus data: ${error.message}`;
-        messageElement.style.color = "var(--danger-color)";
+        if (messageElement) {
+          messageElement.textContent = `Gagal menghapus data: ${error.message}`;
+          messageElement.style.color = "var(--danger-color)";
+        }
       });
   }
 };
 
 /**
- * [FUNGSI BARU] Membuka modal edit dan mengisinya dengan data
+ * [BARU] Membuka modal edit dan mengisinya dengan data (Diperbarui dengan No. HP)
  */
-function openEditNFCModal(uid, currentName) {
-  // Isi field di modal
+function openEditNFCModal(uid, currentName, currentPhone) {
   document.getElementById("modalNFC_UID").value = uid;
   document.getElementById("modalNFC_Name").value = currentName;
-
-  // Bersihkan pesan error/sukses sebelumnya
+  document.getElementById("modalNFC_Phone").value = currentPhone || ""; // Isi No. HP
   document.getElementById("modal-nfc-message").textContent = "";
 
-  // Tampilkan modal
   var myModal = new bootstrap.Modal(document.getElementById("editNFCModal"));
   myModal.show();
 }
 
 /**
- * [FUNGSI BARU] Menyimpan perubahan nama dari modal
+ * [BARU] Menyimpan perubahan nama dan No. HP dari modal
  */
 function executeUpdateNFC() {
   const uid = document.getElementById("modalNFC_UID").value;
   const newName = document.getElementById("modalNFC_Name").value.trim();
+  const newPhone = document.getElementById("modalNFC_Phone").value.trim(); // Ambil No. HP
   const messageElement = document.getElementById("modal-nfc-message");
   const saveBtn = document.getElementById("modal-nfc-save-btn");
 
@@ -546,22 +534,21 @@ function executeUpdateNFC() {
     return;
   }
 
-  // Nonaktifkan tombol agar tidak diklik dua kali
   saveBtn.disabled = true;
   saveBtn.textContent = "Menyimpan...";
   messageElement.textContent = "Memproses...";
   messageElement.style.color = "inherit";
 
-  // Kita gunakan .update() untuk hanya mengubah 'name'
-  // dan membiarkan 'registered_by' / 'registered_at' tetap ada.
   database
     .ref(NFC_USERS_PATH + "/" + uid)
-    .update({ name: newName }) // Hanya update field 'name'
+    .update({
+      name: newName,
+      phone: newPhone, // Simpan No. HP
+    })
     .then(() => {
-      messageElement.textContent = "Nama berhasil diperbarui! ✅";
+      messageElement.textContent = "Data berhasil diperbarui! ✅";
       messageElement.style.color = "var(--success-color)";
 
-      // Tutup modal setelah 1.5 detik
       setTimeout(() => {
         var myModal = bootstrap.Modal.getInstance(document.getElementById("editNFCModal"));
         myModal.hide();
@@ -572,15 +559,17 @@ function executeUpdateNFC() {
       messageElement.style.color = "var(--danger-color)";
     })
     .finally(() => {
-      // Aktifkan kembali tombol
       saveBtn.disabled = false;
       saveBtn.textContent = "Simpan Perubahan";
     });
 }
 
+/**
+ * Muat Daftar Kartu NFC (Diperbarui dengan No. HP & Tombol Edit)
+ */
 function loadNFCCards() {
   const listContainer = document.getElementById("nfc-list-container");
-  if (listContainer.dataset.listenerAttached === "true") return; // Sudah terpasang, jangan duplikat
+  if (listContainer.dataset.listenerAttached === "true") return;
 
   listContainer.innerHTML = '<p class="text-center text-muted">Memuat daftar kartu...</p>';
   database.ref(NFC_USERS_PATH).on("value", (snapshot) => {
@@ -594,17 +583,25 @@ function loadNFCCards() {
     cardUids.forEach((uid) => {
       const userData = usersData[uid];
       const item = document.createElement("div");
-      item.className = "list-group-item d-flex justify-content-between align-items-center";
+      // 'align-items-start' agar tombol tidak meregang
+      item.className = "list-group-item d-flex justify-content-between align-items-start";
       item.style.backgroundColor = "#f1f8ff";
       item.style.borderRadius = "8px";
       item.style.marginBottom = "8px";
+
+      // Ambil data HP, beri nilai default jika kosong
+      const phone = userData.phone || "";
+      const phoneDisplay = phone ? phone : "No HP Kosong!";
+      // Beri warna berbeda jika HP kosong
+      const phoneColor = phone ? "text-muted" : "text-danger";
+
       item.innerHTML = `
-                  <div>
-                      <strong class="text-primary">${userData.name}</strong><br>
-                      <small class="text-muted"><i class="fa-solid fa-tag me-1"></i> UID: ${uid}</small>
+                  <div class="flex-grow-1 me-2"> <strong class="text-primary">${userData.name}</strong><br>
+                      <small class="text-muted"><i class="fa-solid fa-tag me-1"></i> UID: ${uid}</small><br>
+                      <small class="${phoneColor}"><i class="fa-solid fa-phone me-1"></i> ${phoneDisplay}</small>
                   </div>
-                  <div class="d-flex">
-                      <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditNFCModal('${uid}', '${userData.name}')">
+                  <div class="d-flex flex-column"> 
+                      <button class="btn btn-sm btn-outline-primary mb-1" onclick="openEditNFCModal('${uid}', '${userData.name}', '${phone}')">
                           <i class="fa-solid fa-pencil"></i> Edit
                       </button>
                       <button class="btn btn-sm btn-outline-danger" onclick="deleteNFCCard('${uid}', '${userData.name}')">
@@ -627,15 +624,11 @@ document.addEventListener("DOMContentLoaded", () => {
   updateTime();
 
   // 2. Pasang 'listener' untuk URL hash
-  // Ini akan memanggil 'handleRouteChange' setiap kali user klik link (#profile, #gallery)
-  // atau menggunakan tombol back/forward browser
   window.addEventListener("hashchange", handleRouteChange);
 
   // 3. Cek status login (dari localStorage)
-  // Ini akan mengatur 'loggedInUsername'
   checkSession();
 
   // 4. Jalankan router untuk PERTAMA KALI
-  // Ini akan membaca 'loggedInUsername' dan hash URL saat ini, lalu menampilkan halaman yang benar
   handleRouteChange();
 });
