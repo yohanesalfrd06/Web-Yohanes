@@ -185,6 +185,39 @@
       </div>
     </div>
 
+    <!--Modal untuk mengedit data kartu NFC */ --> 
+    <div class="modal fade" id="editNFCModal" tabindex="-1" aria-labelledby="editNFCModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="editNFCModalLabel">Edit Nama Kartu Akses</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted">Perbarui nama yang terkait dengan UID kartu ini.</p>
+            
+            <div class="mb-3">
+              <label for="modalNFC_UID" class="form-label">UID Kartu (Read-Only)</label>
+              <input type="text" class="form-control" id="modalNFC_UID" readonly disabled />
+            </div>
+
+            <div class="mb-3">
+              <label for="modalNFC_Name" class="form-label">Nama Pengguna Baru</label>
+              <input type="text" class="form-control" id="modalNFC_Name" placeholder="Masukkan nama baru" />
+            </div>
+
+            <p id="modal-nfc-message" class="text-danger"></p>
+          </div>
+          <div class="modal-footer">
+            <button type_button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="button" class="btn btn-success" id="modal-nfc-save-btn" onclick="executeUpdateNFC()">
+              Simpan Perubahan
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="script.js"></script>
