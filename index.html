@@ -69,7 +69,7 @@
               <h2 class="h5 text-muted mb-4">Mahasiswa S1 Teknik Elektro UNTIRTA</h2>
 
               <p class="deskripsi-project">
-                Aplikasi sistem monitoring ini dibuat oleh <strong>Yohannes Alfredo</strong> untuk memenuhi Tugas Akhir Strata Satu (S1) di Jurusan Teknik Elektro, Universitas Sultan Ageng Tirtayasa (UNTIRTA). Sistem ini berfungsi untuk
+                Aplikasi sistem monitoring ini dibuat oleh <strong>Yohanes Alfredo</strong> untuk memenuhi Tugas Akhir Strata Satu (S1) di Jurusan Teknik Elektro, Universitas Sultan Ageng Tirtayasa (UNTIRTA). Sistem ini berfungsi untuk
                 memantau perangkat IoT secara realtime melalui Firebase Realtime Database dan menampilkan data historis gambar. Penelitian dilakukan pada area kontainer di lingkungan Fakultas Teknik, UNTIRTA.
               </p>
 
@@ -93,44 +93,12 @@
       </div>
 
       <div id="control-section" class="content-section" style="display: none">
-        <h2 class="mb-4 text-center fw-bold text-primary">Panel Kontrol Perangkat IoT & Admin NFC</h2>
-        <p class="text-center text-muted mb-5">Kontrol mode operasional perangkat secara realtime dan kelola data kartu akses pengguna.</p>
+        <h2 class="mb-4 text-center fw-bold text-primary">Panel Kontrol & Admin NFC</h2>
+        <p class="text-center text-muted mb-5">Kelola data kartu akses pengguna secara realtime.</p>
 
         <div class="row">
-          <div class="col-lg-6">
-            <div class="card control-card p-4">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="card-title mb-0"><i class="fa-solid fa-camera me-2 text-primary"></i> Mode Kamera</h5>
-                <span id="camera-status-label" class="badge badge-status bg-secondary">Memuat...</span>
-              </div>
-              <hr />
-              <div class="d-flex justify-content-between align-items-center">
-                <label class="form-check-label me-3 fw-bold" for="cameraToggle">Mode Otomatis / Manual</label>
-                <div class="form-check form-switch">
-                  <input class="form-check-input" type="checkbox" id="cameraToggle" onclick="toggleCamera(this.checked)" />
-                </div>
-              </div>
-              <small class="text-muted mt-2">Mode Otomatis (Hijau) mengirim perintah ON ke perangkat.</small>
-            </div>
-
-            <div class="card control-card p-4">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="card-title mb-0"><i class="fa-solid fa-door-closed me-2 text-success"></i> Status Kunci Pintu</h5>
-                <span id="solenoid-status-label" class="badge badge-status bg-secondary">Memuat...</span>
-              </div>
-              <hr />
-              <div class="d-flex justify-content-between align-items-center">
-                <label class="form-check-label me-3 fw-bold" for="solenoidToggle">Kontrol Otomatis / Terkunci</label>
-                <div class="form-check form-switch">
-                  <input class="form-check-input" type="checkbox" id="solenoidToggle" onclick="toggleSolenoid(this.checked)" />
-                </div>
-              </div>
-              <small class="text-muted mt-2">Kunci: Hijau=Terkunci (Aman). Merah=Terbuka (Akses Diberikan/Error).</small>
-            </div>
-          </div>
-
-          <div class="col-lg-6">
-            <div class="card control-card p-4 border-success">
+          <div class="col-lg-6 mb-4">
+            <div class="card control-card p-4 border-success h-100">
               <h5 class="card-title mb-3 text-success"><i class="fa-solid fa-plus-circle me-2"></i> Tambah Kartu Akses Baru</h5>
               <p class="text-muted">Masukkan Nama dan UID kartu. UID harus sama persis dengan yang dibaca oleh ESP32.</p>
               <div class="mb-3">
@@ -150,8 +118,10 @@
               <button class="btn btn-success w-100" onclick="addNFCCard()"><i class="fa-solid fa-floppy-disk me-2"></i> Simpan Data Kartu</button>
               <p id="nfc-message" class="text-center mt-3 fw-bold"></p>
             </div>
+          </div>
 
-            <div class="card control-card p-4">
+          <div class="col-lg-6 mb-4">
+            <div class="card control-card p-4 h-100">
               <h5 class="card-title mb-3"><i class="fa-solid fa-list-ul me-2 text-warning"></i> Daftar Kartu Akses Terdaftar</h5>
               <div id="nfc-list-container" class="list-group">
                 <p class="text-center text-muted">Memuat daftar kartu...</p>
