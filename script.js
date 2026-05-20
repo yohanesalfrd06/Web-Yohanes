@@ -283,7 +283,7 @@ function loadGallery() {
   container.innerHTML = "";
   statusEl.textContent = "Memuat data dari Firebase...";
 
-  historyRef.limitToLast(50).on(
+  historyRef.limitToLast(100).on(
     "value",
     (snapshot) => {
       const historyData = snapshot.val();
